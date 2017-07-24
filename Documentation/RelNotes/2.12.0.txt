@@ -110,6 +110,8 @@ Changes since v2.11.0
   `create-branch' variant and the branch exists, then it offers to
   simply checking it out instead of resetting it first.  #3009
 
+* Added command `magit-browse-pull-request'.
+
 Fixes since v2.11.0
 -------------------
 
