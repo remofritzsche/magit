@@ -236,7 +236,12 @@ directory, while reading the FILENAME."
              (?b "Blame"     magit-blame)
              (?p "Prev blob" magit-blob-previous)
              (?c "Commit"    magit-commit-popup) nil nil
-             (?f "...reverse" magit-blame-reverse)
+             (?r (lambda ()
+                   ;; FIXME The popup is the current buffer so this
+                   ;; is always true.
+                   (and (not buffer-file-name)
+                        (propertize "...reverse" 'face 'default)))
+                 magit-blame-reverse)
              (?n "Next blob" magit-blob-next))
   :max-action-columns 5)
 
