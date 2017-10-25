@@ -1380,11 +1380,7 @@ commit or stash at point, then prompt for a commit."
           (user-error "No commit on this line"))))
      (t
       (magit-section-case
-        (branch
-         (setq rev (magit-ref-maybe-qualify (magit-section-value it)))
-         (setq cmd 'magit-show-commit)
-         (setq buf (magit-mode-get-buffer 'magit-revision-mode)))
-        (commit
+        ((commit branch)
          (setq rev (magit-section-value it))
          (setq cmd 'magit-show-commit)
          (setq buf (magit-mode-get-buffer 'magit-revision-mode)))

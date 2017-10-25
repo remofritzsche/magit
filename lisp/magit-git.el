@@ -834,10 +834,8 @@ corresponds to a ref outside of the namespace."
     (cond ((not name)
            (magit-rev-parse "--short" rev))
           ((string-match "^\\(?:tags\\|remotes\\)/\\(.+\\)" name)
-           (if (magit-ref-ambiguous-p (match-string 1 name))
-               name
-             (match-string 1 name)))
-          (t (magit-ref-maybe-qualify name)))))
+           (match-string 1 name))
+          (t name))))
 
 (defun magit-name-branch (rev &optional lax)
   (or (magit-name-local-branch rev)
@@ -872,12 +870,6 @@ as \"^1\" and \"~3\".  "
 
 (defun magit-ref-ambiguous-p (name)
   (not (magit-ref-fullname name)))
-
-(cl-defun magit-ref-maybe-qualify (name &optional (prefix "heads/"))
-  "If NAME is ambiguous, prepend PREFIX to it."
-  (concat (and (magit-ref-ambiguous-p name)
-               prefix)
-          name))
 
 (defun magit-ref-exists-p (ref)
   (magit-git-success "show-ref" "--verify" ref))
@@ -915,7 +907,7 @@ to, or to some other symbolic-ref that points to the same ref."
 
 (defun magit-local-branch-at-point ()
   (magit-section-case
-    (branch (let ((branch (magit-ref-maybe-qualify (magit-section-value it))))
+    (branch (let ((branch (magit-section-value it)))
               (when (member branch (magit-list-local-branch-names))
                 branch)))
     (commit (magit-name-local-branch (magit-section-value it)))))
@@ -935,10 +927,10 @@ to, or to some other symbolic-ref that points to the same ref."
 (defun magit-branch-or-commit-at-point ()
   (or magit-buffer-refname
       (magit-section-case
-        (branch (magit-ref-maybe-qualify (magit-section-value it)))
+        (branch (magit-section-value it))
         (commit (let ((rev (magit-section-value it)))
                   (or (magit-get-shortname rev) rev)))
-        (tag (magit-ref-maybe-qualify (magit-section-value it) "tags/")))
+        (tag    (magit-section-value it)))
       (and (derived-mode-p 'magit-revision-mode
                            'magit-merge-preview-mode)
            (car magit-refresh-args))))

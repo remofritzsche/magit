@@ -189,8 +189,6 @@ Checkout fails if the working tree or the staging area contain
 changes.
 \n(git checkout REVISION)."
   (interactive (list (magit-read-other-branch-or-commit "Checkout")))
-  (when (string-match "\\`heads/\\(.+\\)" revision)
-    (setq revision (match-string 1 revision)))
   (magit-run-git "checkout" revision))
 
 ;;;###autoload
@@ -508,8 +506,6 @@ With prefix, forces the rename even if NEW already exists.
            (magit-read-string-ns (format "Rename branch '%s' to" branch)
                                  nil 'magit-revision-history)
            current-prefix-arg)))
-  (when (string-match "\\`heads/\\(.+\\)" old)
-    (setq old (match-string 1 old)))
   (unless (string= old new)
     (magit-run-git "branch" (if force "-M" "-m") old new)))
 
