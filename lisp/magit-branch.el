@@ -234,7 +234,34 @@ does."
     (setq arg (match-string 1 arg)))
   (if start-point
       (magit-branch-and-checkout arg start-point (magit-branch-arguments))
-    (magit-run-git "checkout" arg)))
+    (magit-checkout arg)))
+
+(defun magit-branch-dwim (branch &optional start-point)
+  ""
+  (interactive
+   (let* ((current (magit-get-current-branch))
+          (local   (magit-list-local-branch-names))
+          (remote  (--keep (and (string-match "[^/]+/" it)
+                                (not (member (substring it (match-end 1)) local))
+                                name)
+                           (magit-list-remote-branch-names)))
+          (choices (nconc (delete current local) remote))
+          (atpoint (magit-branch-at-point))
+          (choice  (magit-completing-read "Checkout branch" choices
+                                          nil t nil 'magit-revision-history
+                                          (and (member atpoint choices)
+                                               atpoint))))
+     (cond ((member choice remote)
+            (list (and (string-match "[^/]+/" it)
+                       (substring it (match-end 1)))
+                  choice))
+           ((member choice local)
+            (list choice))
+           (t
+            (list choice (magit-read-starting-point "Create" choice))))))
+  (if start-point
+      (magit-branch-and-checkout arg start-point (magit-branch-arguments))
+    (magit-checkout arg)))
 
 (defun magit-branch-maybe-adjust-upstream (branch start-point)
   (--when-let
