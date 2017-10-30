@@ -1045,7 +1045,7 @@ excluding SECTION itself."
         (`next  (cdr (member section siblings)))
         (_      (remq section siblings))))))
 
-(defun magit-region-values (&rest types)
+(defun magit-region-values (&optional types multiple)
   "Return a list of the values of the selected sections.
 
 Also see `magit-region-sections' whose doc-string explains when a
@@ -1054,9 +1054,9 @@ or is not a valid section selection, then return nil.  If optional
 TYPES is non-nil then the selection not only has to be valid; the
 types of all selected sections additionally have to match one of
 TYPES, or nil is returned."
-  (mapcar 'magit-section-value (apply 'magit-region-sections types)))
+  (mapcar #'magit-section-value (magit-region-sections types multiple)))
 
-(defun magit-region-sections (&rest types)
+(defun magit-region-sections (&optional types multiple)
   "Return a list of the selected sections.
 
 When the region is active and constitutes a valid section
@@ -1077,13 +1077,17 @@ a valid selection as far as this function is concerned.
 If optional TYPES is non-nil, then the selection not only has to
 be valid; the types of all selected sections additionally have to
 match one of TYPES, or nil is returned."
-  (when (use-region-p)
+  (when (region-active-p)
     (let* ((rbeg (region-beginning))
            (rend (region-end))
            (sbeg (get-text-property rbeg 'magit-section))
            (send (get-text-property rend 'magit-section)))
-      (unless (memq send (list sbeg magit-root-section nil))
-        (let ((siblings (magit-section-siblings sbeg 'next)) sections)
+      (when (and send
+                 (not (eq send magit-root-section))
+                 (or (not multiple)
+                     (eq send sbeg)))
+        (let ((siblings (cons sbeg (magit-section-siblings sbeg 'next)))
+              sections)
           (when (and (memq send siblings)
                      (magit-section-position-in-heading-p sbeg rbeg)
                      (magit-section-position-in-heading-p send rend))
@@ -1091,7 +1095,9 @@ match one of TYPES, or nil is returned."
               (push (car siblings) sections)
               (when (eq (pop siblings) send)
                 (setq siblings nil)))
-            (setq sections (cons sbeg (nreverse sections)))
+            (setq sections (nreverse sections))
+            (when (and types (symbolp types))
+              (setq types (list types)))
             (when (or (not types)
                       (--all-p (memq (magit-section-type it) types) sections))
               sections)))))))

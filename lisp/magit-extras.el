@@ -190,12 +190,11 @@ is a matter of preference."
             "use `forward-line' with negative argument instead."))
   (interactive "p\np")
   (unless arg (setq arg 1))
-  (let ((hunkp (magit-diff-inside-hunk-body-p)))
-    (if (and hunkp (= arg 1) (magit--turn-on-shift-select-mode-p))
-        (push-mark nil nil t)
-      (with-no-warnings
-        (handle-shift-selection)
-        (previous-line (if hunkp (max (1- arg) 1) arg) try-vscroll)))))
+  (if (and (= arg 1) (magit--turn-on-shift-select-mode-p))
+      (push-mark nil nil t)
+    (with-no-warnings
+      (handle-shift-selection)
+      (previous-line (max (1- arg) 1) try-vscroll))))
 
 ;;;###autoload
 (defun magit-next-line (&optional arg try-vscroll)
@@ -211,12 +210,11 @@ prefer is a matter of preference."
   (declare (interactive-only forward-line))
   (interactive "p\np")
   (unless arg (setq arg 1))
-  (let ((hunkp (magit-diff-inside-hunk-body-p)))
-    (if (and hunkp (= arg 1) (magit--turn-on-shift-select-mode-p))
-        (push-mark nil nil t)
-      (with-no-warnings
-        (handle-shift-selection)
-        (next-line (if hunkp (max (1- arg) 1) arg) try-vscroll)))))
+  (if (and (= arg 1) (magit--turn-on-shift-select-mode-p))
+      (push-mark nil nil t)
+    (with-no-warnings
+      (handle-shift-selection)
+      (next-line (max (1- arg) 1) try-vscroll))))
 
 ;;; Clean
 
